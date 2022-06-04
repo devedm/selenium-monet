@@ -1,3 +1,4 @@
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -12,7 +13,7 @@ import time
 import os
 import sys
 
-print(sys.argv[0])
+#print(sys.argv[0])
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
@@ -25,9 +26,9 @@ manualURL = "https://monetanywhere.monetwfo-eu.com/Agent/ManualStatusChanging.as
 
 comp = "Tek experts 1"
 us = "eddy.mena@tek-experts.com"
-pas = sys.argv[0]
+pas = "asdqwezxc19" #sys.argv[0]
 
-print(sys.argv[0])
+#print(sys.argv[0])
 
 # monet status
 
@@ -35,6 +36,19 @@ availableStatus = "01. Available/Case Work"
 breakStatus = "02. Break"
 lunchStatus = "03. Lunch"
 endOfShiftStatus = "10. End of shift"
+
+
+# Second Verification Variables
+
+second_authentication_email_input_id = 'i0116'
+second_authentication_pass_input_id = 'i0118'
+second_authentication_acept_input_id = 'idSIButton9'
+
+
+# Second Login Information
+
+t_email = 'eddy.mena@tek-experts.com'
+t_pas = 'Miercoles2022'
 
 # TIMEOUT
 
@@ -64,8 +78,54 @@ finally:
 
 time.sleep(4)
 
+# Second Authentication
+
+# enter the email
+try:
+    email_second_verification = WebDriverWait(driver,timeout).until(
+        EC.presence_of_element_located((By.ID, second_authentication_email_input_id))
+    )
+
+
+finally:
+    email_second_verification.send_keys(t_email)
+    email_second_verification.send_keys(Keys.ENTER)
+
+    print('Email entered')
+
+# enter the password
+
+time.sleep(4)
+try:
+    pas_second_verification = WebDriverWait(driver,timeout).until(
+        EC.presence_of_element_located((By.ID, second_authentication_pass_input_id))
+    )
+
+
+finally:
+    pas_second_verification.send_keys(t_pas)
+    pas_second_verification.send_keys(Keys.ENTER)
+
+    print('Password entered')
+
+time.sleep(4)
+
+# acept to remain loged in -> check box
+
+try:
+    acept_second_verification = WebDriverWait(driver,timeout).until(
+        EC.presence_of_element_located((By.ID, second_authentication_acept_input_id))
+    )
+
+
+finally:
+    acept_second_verification.click()
+    print('Acepted -> keep the session on')
+
 
 # select the sidebar and go to manual status change
+
+time.sleep(5)
 
 driver.get(manualURL)
 
@@ -98,5 +158,6 @@ try:
     )
 
 finally:    
-    submitButton.click()
-    print("Status submited")
+    #submitButton.click()
+    #print("Status submited")
+    print('Completed button not pressed')
