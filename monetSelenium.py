@@ -26,7 +26,7 @@ manualURL = "https://monetanywhere.monetwfo-eu.com/Agent/ManualStatusChanging.as
 
 comp = "Tek experts 1"
 us = "eddy.mena@tek-experts.com"
-pas = "asdqwezxc19" #sys.argv[0]
+pas = "asdqwezxc19"
 
 #print(sys.argv[0])
 
@@ -48,116 +48,151 @@ second_authentication_acept_input_id = 'idSIButton9'
 # Second Login Information
 
 t_email = 'eddy.mena@tek-experts.com'
-t_pas = 'Miercoles2022'
+t_pas = 'Lunes2022'
 
 # TIMEOUT
 
 timeout = 60
+timeoutAfter = 3
+
+# ------- Methods ------- 
+
+# this baby takes 3 input to login to the loginURL
+def loginMonetFirst(company, username, password):
+
+    # select the inputs and enter the information to login
+    try:
+        companyInput = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.NAME, "txtTenantId"))
+        )
+        usernameInput = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.NAME, "txtUserName"))
+        )
+        passwordInput = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.NAME, "txtPassword"))
+        )
+
+    finally:
+        companyInput.send_keys(company)
+        usernameInput.send_keys(username)
+        passwordInput.send_keys(password)
+        companyInput.send_keys(Keys.ENTER)
+    
+    time.sleep(timeoutAfter)
+
+# this one takes 2 input to access the second verification to the Tek-experts.com domain
+def loginMonetSecond(email, password):
+    # enter the email
+    try:
+        # wait until the input is loaded
+        email_second_verification = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.ID, second_authentication_email_input_id))
+        )
+
+    finally:
+        # enter the value in the input element and continue
+        email_second_verification.send_keys(email)
+        email_second_verification.send_keys(Keys.ENTER)
+
+        print('Email entered')
+
+    # enter the password
+
+    time.sleep(timeoutAfter)
+    try:
+        # wait until the input is loaded
+        pas_second_verification = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.ID, second_authentication_pass_input_id))
+        )
+
+
+    finally:
+        # enter the value in the input element and continue
+        pas_second_verification.send_keys(password)
+        pas_second_verification.send_keys(Keys.ENTER)
+
+        print('Password entered')
+
+    time.sleep(timeoutAfter)
+
+    # acept to remain loged in -> check box
+
+    try:
+        # wait until the button is loaded
+        acept_second_verification = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.ID, second_authentication_acept_input_id))
+        )
+
+
+    finally:
+        # click the element to continue
+        acept_second_verification.click()
+        print('Acepted -> keep the session on')
+
+    time.sleep(timeoutAfter)
+
+def goToUrl(url):
+    driver.get(url)
+    try:
+        WebDriverWait(driver,timeout).until(
+            EC.url_to_be(url)
+        )
+    finally:
+        print("We are in manual status selector")
+    
+    time.sleep(timeoutAfter)
+
+
+# 
+def selectAux(auxiliar):
+    try: 
+        selectTag = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.ID, "drpActivityName"))
+        )
+        selectStatus = Select(selectTag)
+        selectStatus.select_by_visible_text(auxiliar)
+
+    finally:
+        print("1. Available selected!")
+
+    time.sleep(2)
+
+    # Select the submit button
+
+    try:
+        submitButton = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.NAME, "imgSubmitActivity"))
+        )
+
+    finally:    
+        submitButton.click()
+        print('Selected -> ', auxiliar)
+
+# ------- Running Process ------- 
 
 # open website
 
-driver.get(loginURL)
+goToUrl(loginURL)
 
-# select the inputs and enter the information to login
-try:
-    companyInput = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.NAME, "txtTenantId"))
-    )
-    usernameInput = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.NAME, "txtUserName"))
-    )
-    passwordInput = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.NAME, "txtPassword"))
-    )
+# Login to Monet
 
-finally:
-    companyInput.send_keys(comp)
-    usernameInput.send_keys(us)
-    passwordInput.send_keys(pas)
-    companyInput.send_keys(Keys.ENTER)
-
-time.sleep(4)
+loginMonetFirst(comp, us, pas)
 
 # Second Authentication
 
-# enter the email
-try:
-    email_second_verification = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.ID, second_authentication_email_input_id))
-    )
+loginMonetSecond(t_email,t_pas)
 
+# Select the sidebar and go to manual status change
 
-finally:
-    email_second_verification.send_keys(t_email)
-    email_second_verification.send_keys(Keys.ENTER)
+goToUrl(manualURL)
 
-    print('Email entered')
+# change Aux
+'''
+availableStatus = "01. Available/Case Work"
+breakStatus = "02. Break"
+lunchStatus = "03. Lunch"
+endOfShiftStatus = "10. End of shift"
+'''
 
-# enter the password
+selectAux(endOfShiftStatus)
 
-time.sleep(4)
-try:
-    pas_second_verification = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.ID, second_authentication_pass_input_id))
-    )
-
-
-finally:
-    pas_second_verification.send_keys(t_pas)
-    pas_second_verification.send_keys(Keys.ENTER)
-
-    print('Password entered')
-
-time.sleep(4)
-
-# acept to remain loged in -> check box
-
-try:
-    acept_second_verification = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.ID, second_authentication_acept_input_id))
-    )
-
-
-finally:
-    acept_second_verification.click()
-    print('Acepted -> keep the session on')
-
-
-# select the sidebar and go to manual status change
-
-time.sleep(5)
-
-driver.get(manualURL)
-
-try:
-    WebDriverWait(driver,timeout).until(
-        EC.url_to_be(manualURL)
-    )
-finally:
-    print("we are in manual status selector")
-
-
-
-try: 
-    selectTag = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.ID, "drpActivityName"))
-    )
-    selectStatus = Select(selectTag)
-    selectStatus.select_by_visible_text(availableStatus)
-
-finally:
-    print("1. Available selected!")
-
-time.sleep(2)
-
-# Select the submit button
-
-try:
-    submitButton = WebDriverWait(driver,timeout).until(
-        EC.presence_of_element_located((By.NAME, "imgSubmitActivity"))
-    )
-
-finally:    
-    #submitButton.click()
-    #print("Status submited")
-    print('Completed button not pressed')
