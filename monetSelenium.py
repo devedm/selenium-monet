@@ -1,4 +1,3 @@
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -9,67 +8,28 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 
+from varAuth import *
+from varSelection import *
 import time
-import os
-import sys
 
-#print(sys.argv[0])
-
+# Web Driver setup 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-
-# Monet
-
-loginURL = "https://www.monetwfo-eu.com/Monet5/login/login.aspx"
-manualURL = "https://monetanywhere.monetwfo-eu.com/Agent/ManualStatusChanging.aspx"
-
-# Login information
-
-comp = "Tek experts 1"
-us = ""
-pas = ""
-
-#print(sys.argv[0])
-
-# monet status
-
-availableStatus = "01. Available/Case Work"
-breakStatus = "02. Break"
-lunchStatus = "03. Lunch"
-endOfShiftStatus = "10. End of shift"
-
-
-# Second Verification Variables
-
-second_authentication_email_input_id = 'i0116'
-second_authentication_pass_input_id = 'i0118'
-second_authentication_acept_input_id = 'idSIButton9'
-
-
-# Second Login Information
-
-t_email = ''
-t_pas = ''
-
-# TIMEOUT
-
-timeout = 60
-timeoutAfter = 3
 
 # ------- Methods ------- 
 
 # this baby takes 3 input to login to the loginURL
-def loginMonetFirst(company, username, password):
+def loginMonet(company, username, password):
 
     # select the inputs and enter the information to login
     try:
         companyInput = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.NAME, "txtTenantId"))
+            EC.presence_of_element_located((By.ID, IDMonetLoginInputCompany))
         )
         usernameInput = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.NAME, "txtUserName"))
+            EC.presence_of_element_located((By.ID, IDMonetLoginInputUsername))
         )
         passwordInput = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.NAME, "txtPassword"))
+            EC.presence_of_element_located((By.ID, IDMonetLoginInputPassword))
         )
 
     finally:
@@ -77,16 +37,17 @@ def loginMonetFirst(company, username, password):
         usernameInput.send_keys(username)
         passwordInput.send_keys(password)
         companyInput.send_keys(Keys.ENTER)
+        print('Monet Login Completed')
     
     time.sleep(timeoutAfter)
 
 # this one takes 2 input to access the second verification to the Tek-experts.com domain
-def loginMonetSecond(email, password):
+def loginTek(email, password):
     # enter the email
     try:
         # wait until the input is loaded
         email_second_verification = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.ID, second_authentication_email_input_id))
+            EC.presence_of_element_located((By.ID, IDTekLoginInputEmail))
         )
 
     finally:
@@ -94,7 +55,7 @@ def loginMonetSecond(email, password):
         email_second_verification.send_keys(email)
         email_second_verification.send_keys(Keys.ENTER)
 
-        print('Email entered')
+        print('Tek Email entered')
 
     # enter the password
 
@@ -102,7 +63,7 @@ def loginMonetSecond(email, password):
     try:
         # wait until the input is loaded
         pas_second_verification = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.ID, second_authentication_pass_input_id))
+            EC.presence_of_element_located((By.ID, IDTekLoginInputPassword))
         )
 
 
@@ -111,7 +72,7 @@ def loginMonetSecond(email, password):
         pas_second_verification.send_keys(password)
         pas_second_verification.send_keys(Keys.ENTER)
 
-        print('Password entered')
+        print('Tek Password entered')
 
     time.sleep(timeoutAfter)
 
@@ -119,17 +80,17 @@ def loginMonetSecond(email, password):
 
     try:
         # wait until the button is loaded
-        acept_second_verification = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.ID, second_authentication_acept_input_id))
+        persist_login = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.ID, IDTekLoginButtonPersistLogin))
         )
-
-
+        
     finally:
         # click the element to continue
-        acept_second_verification.click()
-        print('Acepted -> keep the session on')
+        persist_login.click()
+        print('Acepted -> Tek keep the session on')
 
     time.sleep(timeoutAfter)
+
 
 def goToUrl(url):
     driver.get(url)
@@ -138,65 +99,63 @@ def goToUrl(url):
             EC.url_to_be(url)
         )
     finally:
-        print("We are in manual status selector")
+        print(f"We went to {url}")
     
     time.sleep(timeoutAfter)
 
 
-# 
+def clickOnId(id):
+    try:
+        redirectButton = WebDriverWait(driver,timeout).until(
+            EC.presence_of_element_located((By.ID, id))
+        )
+
+    finally:
+        redirectButton.click()
+        print(f'Clicked on Id: {id}')
+    
+    time.sleep(timeoutAfter)
+
+# Select Aux in the New Portal
 def selectAux(auxiliar):
     try: 
         selectTag = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.ID, "drpActivityName"))
+            EC.presence_of_element_located((By.ID, IDAuxDropDown))
         )
         selectStatus = Select(selectTag)
         selectStatus.select_by_visible_text(auxiliar)
 
     finally:
-        print("1. Available selected!")
-
-    time.sleep(2)
+        print(f"The auxiliar : {auxiliar} has been selected")
 
     # Select the submit button
 
     try:
         submitButton = WebDriverWait(driver,timeout).until(
-            EC.presence_of_element_located((By.NAME, "imgSubmitActivity"))
+            EC.presence_of_element_located((By.ID, IDSubmitAuxiliarButton))
         )
 
-    finally:    
+    finally:
         submitButton.click()
-        print('Selected -> ', auxiliar)
+        print("Submit button clicked")
 
-# ------- Running Process ------- 
+    print(f"The aux {auxSelected} was changed succesfully")
 
-# open website
+# -- Workflow --
 
-goToUrl(loginURL)
+# go to Monet URL
+goToUrl(monetURL)
 
 # Login to Monet
+loginMonet(company, userName, passCode)
 
-loginMonetFirst(comp, us, pas)
+# Login with Tek Account
+loginTek(userName, passCode)
 
-# Second Authentication
+# Redirecting to New Portal
+clickOnId(IDRedirectLink)
 
-loginMonetSecond(t_email,t_pas)
+selectAux(auxSelected)
 
-# Select the sidebar and go to manual status change
-
-goToUrl(manualURL)
-
-# change Aux
-'''
-availableStatus = "01. Available/Case Work"
-breakStatus = "02. Break"
-lunchStatus = "03. Lunch"
-endOfShiftStatus = "10. End of shift"
-'''
-
-selectAux(breakStatus)
-
-# end the session :D
-time.sleep(2)
-print("Closing session")
-driver.quit ()
+print("The session is closing")
+driver.quit()
