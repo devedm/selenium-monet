@@ -9,8 +9,8 @@ timeoutAfter = 3
 # Authentication
 
 company = "Tek experts 1"
-userName = "eddy.mena@tek-experts.com"
-passCode = "ASdf19xd."
+userName = ""
+passCode = ""
 
 # Monet Selectors
 
