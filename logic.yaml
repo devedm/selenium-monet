@@ -1,6 +1,9 @@
+# YAML for MS-hosted Selenium + WebDriver
+
+trigger: none
+
 pool:
   vmImage: windows-latest
-  # name: Windows
 
 steps:
 
@@ -19,10 +22,12 @@ steps:
 - script: pip install webdriver-manager
   displayName: 'Install wedriver-manager'
 
+- script: pip install packaging
+  displayName: 'Install packaging'
+
   
 - task: PythonScript@0
   displayName: Login & Change Auxiliar
   inputs:
     scriptSource: 'filePath'
-    scriptPath: 'script.py'
-    arguments: '$(pass)'
+    scriptPath: 'newLogin.py'
